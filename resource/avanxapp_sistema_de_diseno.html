@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0B2D5B">
+<title>Avanxapp — Sistema de diseño</title>
+<style>
+:root{
+  --navy:#0B2D5B; --navy-2:#123D78; --orange:#FF6600;
+  --white:#FFFFFF; --gray-50:#F5F7FA; --gray-100:#E9EEF4;
+  --gray-300:#C8D1DC; --gray-500:#718096; --gray-700:#344256;
+  --ink:#172334; --success:#16845B; --warning:#D98A00; --danger:#C53B45;
+  --radius-sm:8px; --radius-md:14px; --radius-lg:22px;
+  --shadow:0 12px 32px rgba(11,45,91,.08);
+  --font: "Inter", "Segoe UI", Arial, sans-serif;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:#F3F6FA;color:var(--ink);font-family:var(--font);line-height:1.55}
+a{color:inherit;text-decoration:none}
+button{font:inherit}
+.shell{max-width:1240px;margin:auto;padding:28px 24px 70px}
+.topbar{background:var(--navy);color:white;border-radius:22px;padding:26px 34px;display:flex;align-items:center;justify-content:space-between;gap:24px;overflow:hidden;position:relative;box-shadow:var(--shadow)}
+.topbar:after{content:"";position:absolute;right:-15px;top:-70px;width:290px;height:230px;border-left:34px solid #123D78;border-right:34px solid var(--orange);transform:skew(-35deg);opacity:.95}
+.brand{font-size:32px;font-weight:850;letter-spacing:-1.7px;position:relative;z-index:1}
+.brand span{color:var(--orange)}
+.topline{font-size:15px;opacity:.9;position:relative;z-index:1}
+.nav{display:flex;gap:8px;flex-wrap:wrap;margin:22px 0 28px}
+.nav a{padding:9px 14px;background:white;border:1px solid var(--gray-100);border-radius:999px;color:var(--navy);font-size:13px;font-weight:700}
+.nav a:hover{background:var(--navy);color:white}
+.intro{padding:22px 2px 8px}
+.eyebrow{font-size:11px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--orange)}
+h1{font-size:clamp(30px,4vw,46px);line-height:1.1;letter-spacing:-1.6px;color:var(--navy);margin:8px 0}
+.lead{max-width:760px;color:var(--gray-700);font-size:16px}
+.section{margin-top:26px;background:white;border:1px solid #E5EBF2;border-radius:var(--radius-lg);padding:26px;box-shadow:var(--shadow)}
+.section-head{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;margin-bottom:20px}
+h2{font-size:22px;letter-spacing:-.6px;color:var(--navy);margin:0}
+h3{font-size:15px;color:var(--navy);margin:0 0 10px}
+.muted{color:var(--gray-500);font-size:13px}
+.grid{display:grid;gap:16px}
+.two{grid-template-columns:repeat(2,minmax(0,1fr))}
+.three{grid-template-columns:repeat(3,minmax(0,1fr))}
+.four{grid-template-columns:repeat(4,minmax(0,1fr))}
+.card{border:1px solid var(--gray-100);border-radius:var(--radius-md);padding:18px;background:var(--white)}
+.logo-stage{min-height:190px;display:flex;align-items:center;justify-content:center;background:#fff;border:1px dashed var(--gray-300);border-radius:14px;padding:24px}
+.wordmark{font-size:clamp(36px,5vw,62px);font-weight:850;letter-spacing:-3px;color:var(--navy);white-space:nowrap}
+.wordmark .x{color:var(--orange)}
+.symbol{width:150px;height:150px;display:block}
+.symbol.small{width:70px;height:70px}
+.logo-dark{background:var(--navy);border-radius:14px}
+.logo-dark .wordmark{color:white}
+.logo-orange{background:var(--orange);border-radius:14px}
+.logo-orange .wordmark{color:white}
+.note{border-left:4px solid var(--orange);padding:12px 15px;background:#FFF6F0;border-radius:0 10px 10px 0;color:#67402B;font-size:13px}
+.swatch{height:105px;border-radius:12px;margin-bottom:13px;border:1px solid rgba(0,0,0,.05)}
+.color-name{font-weight:800;color:var(--navy);font-size:14px}
+.hex{font-family:ui-monospace,Consolas,monospace;font-size:13px;color:var(--gray-700)}
+.color-meta{font-size:11px;color:var(--gray-500);margin-top:7px}
+.copy{border:1px solid var(--gray-300);background:white;border-radius:8px;padding:6px 10px;font-size:11px;font-weight:700;color:var(--navy);cursor:pointer}
+.copy:hover{border-color:var(--orange);color:var(--orange)}
+.type-sample{font-size:44px;line-height:1;font-weight:800;letter-spacing:-2px;color:var(--navy)}
+.type-scale{display:flex;align-items:baseline;gap:15px;border-bottom:1px solid var(--gray-100);padding:10px 0}
+.type-scale:last-child{border:0}
+.type-scale strong{width:64px;color:var(--navy)}
+.type-scale span{color:var(--gray-700)}
+.weight{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--gray-100)}
+.weight:last-child{border:0}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:12px 18px;border-radius:999px;border:1px solid transparent;font-weight:750;font-size:13px;cursor:pointer;transition:.2s}
+.primary{background:var(--navy);color:white}.primary:hover{background:var(--navy-2);transform:translateY(-1px)}
+.secondary{background:var(--orange);color:white}.secondary:hover{filter:brightness(.95);transform:translateY(-1px)}
+.outline{background:white;color:var(--navy);border-color:var(--navy)}.ghost{background:transparent;color:var(--navy);border-color:var(--gray-300)}
+.btn-row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.field{display:grid;gap:6px;margin:10px 0}
+label{font-size:12px;font-weight:750;color:var(--gray-700)}
+input,select{width:100%;padding:11px 12px;border:1px solid var(--gray-300);border-radius:9px;font:inherit;color:var(--ink);background:white}
+input:focus,select:focus{outline:3px solid rgba(255,102,0,.16);border-color:var(--orange)}
+.pill{display:inline-flex;padding:5px 10px;border-radius:999px;font-size:11px;font-weight:800}
+.pill.blue{background:#E8F0FA;color:var(--navy)}.pill.orange{background:#FFF0E6;color:#B94A00}
+.pill.green{background:#E7F5EF;color:var(--success)}.pill.gray{background:var(--gray-100);color:var(--gray-700)}
+.icon-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.icon-box{padding:16px;border:1px solid var(--gray-100);border-radius:12px;text-align:center;color:var(--navy);font-size:12px;font-weight:700}
+.icon-box b{display:block;font-size:25px;margin-bottom:5px}
+.spacing{display:flex;align-items:end;gap:12px;min-height:120px}
+.space-item{display:grid;gap:7px;justify-items:center;font-size:11px;color:var(--gray-500)}
+.space-bar{background:var(--orange);border-radius:5px 5px 0 0;width:30px}
+.radius-demo{height:65px;background:#EAF0F8;border:2px solid var(--navy);display:flex;align-items:center;justify-content:center;color:var(--navy);font-size:12px;font-weight:700}
+.do{border-top:3px solid var(--success)}.dont{border-top:3px solid var(--danger)}
+.do li::marker{color:var(--success)}.dont li::marker{color:var(--danger)}
+.footer{margin-top:28px;padding:22px;text-align:center;color:var(--gray-500);font-size:12px}
+@media(max-width:850px){.four{grid-template-columns:repeat(2,1fr)}.three{grid-template-columns:repeat(2,1fr)}.topbar{align-items:flex-start;flex-direction:column}.topbar:after{opacity:.3}}
+@media(max-width:600px){.shell{padding:14px 12px 40px}.section{padding:18px}.two,.three,.four{grid-template-columns:1fr}.wordmark{font-size:36px;letter-spacing:-2px}.logo-stage{min-height:150px}.icon-grid{grid-template-columns:repeat(2,1fr)}.section-head{display:block}.topline{max-width:250px}}
+@media print{body{background:white}.shell{max-width:none;padding:0}.section,.topbar{box-shadow:none;break-inside:avoid}.nav{display:none}.copy{display:none}}
+</style>
+</head>
+<body>
+<div class="shell">
+<header class="topbar">
+  <div class="brand">Avan<span>x</span>app</div>
+  <div class="topline">Sistema de diseño · Identidad visual y componentes</div>
+</header>
+<nav class="nav">
+  <a href="#identidad">Identidad</a><a href="#color">Colores</a><a href="#tipografia">Tipografía</a>
+  <a href="#componentes">Componentes</a><a href="#espaciado">Espaciado</a><a href="#uso">Uso de marca</a>
+</nav>
+<div class="intro">
+  <div class="eyebrow">Brand system · Versión 1.0</div>
+  <h1>Una identidad clara, dinámica y tecnológica.</h1>
+  <p class="lead">Avanxapp combina una base azul profundo con un acento naranja enérgico. El sistema busca transmitir confianza, avance, innovación y soluciones digitales, manteniendo una interfaz limpia y consistente.</p>
+</div>
+
+<section class="section" id="identidad">
+ <div class="section-head"><div><div class="eyebrow">01 / Marca</div><h2>Identidad y construcción del logo</h2></div><span class="pill blue">Identidad principal</span></div>
+ <div class="grid two">
+  <div class="card"><h3>Logotipo principal</h3><div class="logo-stage"><div class="wordmark">Avan<span class="x">x</span>app</div></div><p class="muted">Versión horizontal. “Avan” y “app” en azul; la “x” funciona como acento naranja.</p></div>
+  <div class="card"><h3>Isotipo</h3><div class="logo-stage">
+   <svg class="symbol" viewBox="0 0 200 200" role="img" aria-label="Isotipo geométrico azul y naranja">
+    <g fill="none" stroke="#0B2D5B" stroke-width="13" stroke-linecap="square" stroke-linejoin="miter">
+     <path d="M25 178V24H112 M25 77H91 M25 125H65"/>
+    </g>
+    <path fill="#0B2D5B" d="M104 24h42L78 178H36z"/>
+    <path fill="#FF6600" d="M145 24l34 57-27 28-35-57z"/>
+    <path fill="#FF6600" d="M112 126l25 24 48-57 18 19-66 73-45-42z"/>
+    <path fill="#FF6600" d="M153 144l20-19 25 53h-31z"/>
+   </svg>
+  </div><p class="muted">Símbolo independiente para favicon, avatar, app icon y espacios reducidos.</p></div>
+ </div>
+ <div class="grid three" style="margin-top:16px">
+  <div class="card"><h3>Sobre fondo claro</h3><div class="logo-stage"><div class="wordmark" style="font-size:35px;letter-spacing:-2px">Avan<span class="x">x</span>app</div></div></div>
+  <div class="card"><h3>Sobre fondo oscuro</h3><div class="logo-stage logo-dark"><div class="wordmark" style="font-size:35px;letter-spacing:-2px">Avan<span class="x">x</span>app</div></div></div>
+  <div class="card"><h3>Sobre fondo naranja</h3><div class="logo-stage logo-orange"><div class="wordmark" style="font-size:35px;letter-spacing:-2px">Avan<span style="color:white">x</span>app</div></div></div>
+ </div>
+ <div class="note" style="margin-top:16px"><b>Nota de producción:</b> el isotipo SVG de esta guía es una recreación vectorial de referencia basada en la imagen compartida. Para usos oficiales, sustituirlo por el archivo maestro aprobado del logo.</div>
+</section>
+
+<section class="section" id="color">
+ <div class="section-head"><div><div class="eyebrow">02 / Color</div><h2>Sistema de colores</h2></div><span class="muted">Paleta base y funcional</span></div>
+ <div class="grid three">
+  <div class="card"><div class="swatch" style="background:#0B2D5B"></div><div class="color-name">Azul principal</div><div class="hex">#0B2D5B</div><div class="color-meta">RGB 11, 45, 91 · CMYK 88, 51, 0, 64</div><button class="copy" data-copy="#0B2D5B">Copiar HEX</button></div>
+  <div class="card"><div class="swatch" style="background:#FF6600"></div><div class="color-name">Naranja destacado</div><div class="hex">#FF6600</div><div class="color-meta">RGB 255, 102, 0 · CMYK 0, 60, 100, 0</div><button class="copy" data-copy="#FF6600">Copiar HEX</button></div>
+  <div class="card"><div class="swatch" style="background:#F5F7FA"></div><div class="color-name">Gris claro</div><div class="hex">#F5F7FA</div><div class="color-meta">RGB 245, 247, 250 · Fondos suaves</div><button class="copy" data-copy="#F5F7FA">Copiar HEX</button></div>
+  <div class="card"><div class="swatch" style="background:#172334"></div><div class="color-name">Gris oscuro</div><div class="hex">#172334</div><div class="color-meta">RGB 23, 35, 52 · Texto principal</div><button class="copy" data-copy="#172334">Copiar HEX</button></div>
+  <div class="card"><div class="swatch" style="background:#94A3B8"></div><div class="color-name">Gris secundario</div><div class="hex">#94A3B8</div><div class="color-meta">RGB 148, 163, 184 · Texto auxiliar</div><button class="copy" data-copy="#94A3B8">Copiar HEX</button></div>
+  <div class="card"><div class="swatch" style="background:#FFFFFF;border:1px solid #D7DEE8"></div><div class="color-name">Blanco</div><div class="hex">#FFFFFF</div><div class="color-meta">RGB 255, 255, 255 · Superficies</div><button class="copy" data-copy="#FFFFFF">Copiar HEX</button></div>
+ </div>
+ <h3 style="margin-top:22px">Colores funcionales de interfaz</h3>
+ <div class="grid four">
+  <div class="card"><div class="swatch" style="height:52px;background:#16845B"></div><b>Éxito</b><div class="hex">#16845B</div></div>
+  <div class="card"><div class="swatch" style="height:52px;background:#D98A00"></div><b>Advertencia</b><div class="hex">#D98A00</div></div>
+  <div class="card"><div class="swatch" style="height:52px;background:#C53B45"></div><b>Error</b><div class="hex">#C53B45</div></div>
+  <div class="card"><div class="swatch" style="height:52px;background:#123D78"></div><b>Azul hover</b><div class="hex">#123D78</div></div>
+ </div>
+ <div class="note" style="margin-top:16px">Proporción orientativa: 60% superficies claras, 30% azul principal y 10% naranja. El naranja debe destacar acciones y elementos clave, no competir con todo el contenido.</div>
+</section>
+
+<section class="section" id="tipografia">
+ <div class="section-head"><div><div class="eyebrow">03 / Tipografía</div><h2>Jerarquía tipográfica</h2></div><span class="pill gray">Sans serif</span></div>
+ <div class="grid two">
+  <div class="card"><h3>Familia recomendada</h3><div class="type-sample">Aa</div><h3 style="margin-top:12px">Inter</h3><p class="muted">Alternativa: Plus Jakarta Sans. Para web, usar archivos locales o cargar la familia desde un proveedor tipográfico autorizado.</p><div class="weight"><span>Regular</span><b style="font-weight:400">Aa 0123</b></div><div class="weight"><span>Medium</span><b style="font-weight:500">Aa 0123</b></div><div class="weight"><span>Semibold</span><b style="font-weight:650">Aa 0123</b></div><div class="weight"><span>Bold</span><b style="font-weight:800">Aa 0123</b></div></div>
+  <div class="card"><h3>Escala recomendada</h3>
+   <div class="type-scale"><strong>H1 · 40</strong><span style="font-size:30px;font-weight:800;color:#0B2D5B">Impulsa tus ideas</span></div>
+   <div class="type-scale"><strong>H2 · 28</strong><span style="font-size:24px;font-weight:750;color:#0B2D5B">Soluciones digitales</span></div>
+   <div class="type-scale"><strong>H3 · 20</strong><span style="font-size:19px;font-weight:700">Diseñado para avanzar</span></div>
+   <div class="type-scale"><strong>Body · 16</strong><span style="font-size:16px">Texto de lectura principal.</span></div>
+   <div class="type-scale"><strong>Small · 13</strong><span style="font-size:13px">Etiquetas y texto auxiliar.</span></div>
+  </div>
+ </div>
+</section>
+
+<section class="section" id="componentes">
+ <div class="section-head"><div><div class="eyebrow">04 / UI</div><h2>Componentes de interfaz</h2></div><span class="muted">Estados y patrones básicos</span></div>
+ <div class="grid two">
+  <div class="card"><h3>Botones</h3><div class="btn-row"><button class="btn primary">Primario →</button><button class="btn secondary">Secundario</button><button class="btn outline">Outline</button><button class="btn ghost">Ghost</button></div><p class="muted">Usar una acción primaria dominante por sección. Mantener verbos concretos.</p></div>
+  <div class="card"><h3>Etiquetas de estado</h3><div class="btn-row"><span class="pill blue">En proceso</span><span class="pill orange">Destacado</span><span class="pill green">Completado</span><span class="pill gray">Borrador</span></div><p class="muted">Los estados deben combinar color y texto, nunca depender solo del color.</p></div>
+  <div class="card"><h3>Campos de formulario</h3><div class="field"><label for="demo-name">Nombre</label><input id="demo-name" placeholder="Escribe tu nombre"></div><div class="field"><label for="demo-select">Tipo de proyecto</label><select id="demo-select"><option>Selecciona una opción</option><option>Aplicación web</option><option>Software empresarial</option></select></div></div>
+  <div class="card"><h3>Tarjeta de contenido</h3><div style="padding:18px;border:1px solid #E9EEF4;border-radius:14px"><span class="pill orange">NUEVO</span><h3 style="margin-top:12px">Panel de control</h3><p class="muted">Organiza información y consulta indicadores desde un solo lugar.</p><a href="#uso" style="color:#0B2D5B;font-weight:800;font-size:13px">Ver detalles →</a></div></div>
+ </div>
+ <div class="card" style="margin-top:16px"><h3>Iconografía</h3><div class="icon-grid"><div class="icon-box"><b>⌂</b>Inicio</div><div class="icon-box"><b>▦</b>Aplicaciones</div><div class="icon-box"><b>⚙</b>Configuración</div><div class="icon-box"><b>⌕</b>Búsqueda</div><div class="icon-box"><b>▥</b>Analítica</div><div class="icon-box"><b>♧</b>Notificaciones</div><div class="icon-box"><b>＋</b>Crear</div><div class="icon-box"><b>↗</b>Compartir</div></div><p class="muted">Preferir iconos geométricos, simples y consistentes. Usar azul por defecto y naranja solo para énfasis o notificaciones.</p></div>
+</section>
+
+<section class="section" id="espaciado">
+ <div class="section-head"><div><div class="eyebrow">05 / Layout</div><h2>Espaciado, bordes y estructura</h2></div></div>
+ <div class="grid two">
+  <div class="card"><h3>Escala de espaciado · múltiplos de 4 px</h3><div class="spacing">
+   <div class="space-item"><div class="space-bar" style="height:4px"></div>4</div><div class="space-item"><div class="space-bar" style="height:8px"></div>8</div><div class="space-item"><div class="space-bar" style="height:16px"></div>16</div><div class="space-item"><div class="space-bar" style="height:24px"></div>24</div><div class="space-item"><div class="space-bar" style="height:32px"></div>32</div><div class="space-item"><div class="space-bar" style="height:48px"></div>48</div><div class="space-item"><div class="space-bar" style="height:64px"></div>64</div>
+  </div></div>
+  <div class="card"><h3>Radio de esquinas</h3><div class="grid three"><div><div class="radius-demo" style="border-radius:8px">8 px</div><p class="muted">Pequeño</p></div><div><div class="radius-demo" style="border-radius:14px">14 px</div><p class="muted">Medio</p></div><div><div class="radius-demo" style="border-radius:22px">22 px</div><p class="muted">Grande</p></div></div></div>
+ </div>
+ <div class="card" style="margin-top:16px"><h3>Principios de layout</h3><ul><li>Usar una retícula consistente y alineaciones claras.</li><li>Priorizar espacios en blanco para facilitar la lectura.</li><li>Limitar el ancho de párrafos largos para mejorar legibilidad.</li><li>En móvil, apilar columnas y mantener controles cómodos para el tacto.</li><li>Usar sombras sutiles; evitar efectos 3D y degradados en la identidad principal.</li></ul></div>
+</section>
+
+<section class="section" id="uso">
+ <div class="section-head"><div><div class="eyebrow">06 / Aplicación</div><h2>Uso correcto de la marca</h2></div></div>
+ <div class="grid two">
+  <div class="card do"><h3>✓ Recomendado</h3><ul><li>Respetar los colores y proporciones originales.</li><li>Dejar espacio libre alrededor del logo.</li><li>Usar el isotipo cuando el espacio sea reducido.</li><li>Garantizar contraste suficiente con el fondo.</li><li>Usar versiones monocromáticas solo si el medio lo exige.</li></ul></div>
+  <div class="card dont"><h3>✕ Evitar</h3><ul><li>Estirar, comprimir o inclinar el logotipo.</li><li>Cambiar el naranja por otros tonos sin criterio.</li><li>Agregar sombras, biseles o degradados al logo.</li><li>Colocar el logo sobre fondos con poco contraste.</li><li>Separar o reordenar las letras del nombre.</li></ul></div>
+ </div>
+ <div class="grid three" style="margin-top:16px">
+  <div class="card"><h3>Web</h3><div style="background:#F5F7FA;padding:20px;border-radius:12px"><div class="wordmark" style="font-size:25px;letter-spacing:-1.5px">Avan<span class="x">x</span>app</div><p class="muted">Tecnología que avanza contigo.</p><button class="btn primary">Conocer más</button></div></div>
+  <div class="card"><h3>App / avatar</h3><div style="height:145px;background:#0B2D5B;border-radius:20px;display:grid;place-items:center"><svg class="symbol small" viewBox="0 0 200 200"><path fill="#fff" d="M25 178V24H112 M25 77H91 M25 125H65" stroke="#fff" stroke-width="13" fill="none"/><path fill="#fff" d="M104 24h42L78 178H36z"/><path fill="#FF6600" d="M145 24l34 57-27 28-35-57zM112 126l25 24 48-57 18 19-66 73-45-42zM153 144l20-19 25 53h-31z"/></svg></div></div>
+  <div class="card"><h3>Material corporativo</h3><div style="background:white;border:1px solid #E9EEF4;padding:20px;border-radius:12px;min-height:145px"><div class="wordmark" style="font-size:24px;letter-spacing:-1px">Avan<span class="x">x</span>app</div><div style="height:5px;width:65px;background:#FF6600;margin-top:20px"></div><p class="muted">Nombre · Cargo · Contacto</p></div></div>
+ </div>
+</section>
+<footer class="footer">AVANXAPP · Sistema de diseño de referencia · Versión 1.0<br>Documento editable en HTML. Los valores de color y tipografía pueden ajustarse según el manual final de marca.</footer>
+</div>
+<script>
+document.querySelectorAll('[data-copy]').forEach(button=>{
+ button.addEventListener('click', async ()=>{
+  const value=button.getAttribute('data-copy');
+  try{await navigator.clipboard.writeText(value);button.textContent='¡Copiado!';}
+  catch(e){button.textContent=value;}
+  setTimeout(()=>button.textContent='Copiar HEX',1400);
+ });
+});
+</script>
+</body>
+</html>

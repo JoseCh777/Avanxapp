@@ -1,68 +1,65 @@
-:root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
+@import 'tailwindcss';
 
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+@theme {
+  /* Marca */
+  --color-navy: #0b2d5b;
+  --color-navy-hover: #123d78;
+  --color-orange: #ff6600;
+  --color-orange-soft: #fff0e6;
+  --color-orange-ink: #b94a00;
 
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
+  /* Neutros */
+  --color-gray-50: #f5f7fa;
+  --color-gray-100: #e9eef4;
+  --color-gray-200: #d7dee8;
+  --color-gray-300: #c8d1dc;
+  --color-gray-500: #718096;
+  --color-gray-700: #344256;
+  --color-ink: #172334;
+  --color-aux: #94a3b8;
 
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-a:hover {
-  color: #535bf2;
-}
+  /* Funcionales */
+  --color-success: #16845b;
+  --color-success-soft: #e7f5ef;
+  --color-warning: #d98a00;
+  --color-warning-soft: #fdf3e0;
+  --color-danger: #c53b45;
+  --color-danger-soft: #fbeaeb;
 
-body {
-  margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
-}
+  /* Tipografía */
+  --font-sans: 'Inter', 'Segoe UI', Arial, sans-serif;
 
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
-}
+  /* Radios */
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 22px;
 
-button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
-  cursor: pointer;
-  transition: border-color 0.25s;
-}
-button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+  /* Sombras */
+  --shadow-soft: 0 12px 32px rgba(11, 45, 91, 0.08);
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
   }
-  a:hover {
-    color: #747bff;
+
+  body {
+    @apply bg-gray-50 font-sans text-ink antialiased;
+    margin: 0;
   }
-  button {
-    background-color: #f9f9f9;
+
+  /* Foco visible y de alto contraste en toda la app */
+  :focus-visible {
+    outline: 3px solid rgba(255, 102, 0, 0.55);
+    outline-offset: 2px;
+  }
+
+  /* Toque mínimo de 48 px en controles interactivos */
+  button,
+  a[role='button'],
+  input,
+  select,
+  textarea {
+    min-height: 48px;
   }
 }
