@@ -208,7 +208,7 @@ export async function registrarAvance(
 
   await db.transaction(
     'rw',
-    db.etapaAvances,
+    db.etapa_avances,
     db.etapas,
     db.outbox,
     async () => {
@@ -217,7 +217,7 @@ export async function registrarAvance(
         throw new Error('La etapa no existe en este dispositivo.')
       }
 
-      await db.etapaAvances.add(avance)
+      await db.etapa_avances.add(avance)
 
       const actualizada: Etapa = {
         ...etapa,

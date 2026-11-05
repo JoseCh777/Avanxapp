@@ -12,13 +12,14 @@ import {
   ReceiptText,
   StickyNote,
 } from 'lucide-react'
+import { RegistrarConsumoDialog } from '@/components/materiales/registrar-consumo-dialog'
 import { RegistrarAvanceDialog } from '@/components/obras/registrar-avance-dialog'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardDescription, CardTitle } from '@/components/ui/card'
 import { EmptyState } from '@/components/ui/empty-state'
 import { Progress } from '@/components/ui/progress'
-import { db } from '@/lib/db'
+import { db, type Material } from '@/lib/db'
 import { calcularAvance, formatearFecha } from '@/lib/obras'
 
 export const Route = createFileRoute('/obras/$id')({
@@ -29,6 +30,7 @@ function ObraPage() {
   const { id } = Route.useParams()
   const [avanceAbierto, setAvanceAbierto] = useState(false)
   const [etapaInicial, setEtapaInicial] = useState<string | null>(null)
+  const [consumoAbierto, setConsumoAbierto] = useState(false)
 
   const obra = useLiveQuery(() => db.obras.get(id), [id])
   const etapas = useLiveQuery(
@@ -40,7 +42,7 @@ function ObraPage() {
   )
   const avances = useLiveQuery(
     async () =>
-      (await db.etapaAvances.where('obra_id').equals(id).toArray()).sort(
+      (await db.etapa_avances.where('obra_id').equals(id).toArray()).sort(
         (a, b) => b.captured_at.localeCompare(a.captured_at),
       ),
     [id],
@@ -57,6 +59,20 @@ function ObraPage() {
       ),
     [id],
   )
+  const materiales = useLiveQuery(
+    async () =>
+      (await db.materiales.toArray())
+        .filter((material) => !material.deleted_at)
+        .sort((a, b) => a.nombre.localeCompare(b.nombre, 'es')),
+    [],
+  )
+  const consumos = useLiveQuery(
+    async () =>
+      (await db.consumos.where('obra_id').equals(id).toArray()).sort((a, b) =>
+        b.created_at.localeCompare(a.created_at),
+      ),
+    [id],
+  )
 
   const avance = useMemo(() => calcularAvance(etapas ?? []), [etapas])
   const nombresEtapas = useMemo(() => {
@@ -64,6 +80,30 @@ function ObraPage() {
     for (const etapa of etapas ?? []) mapa.set(etapa.id, etapa.nombre)
     return mapa
   }, [etapas])
+
+  const inventario = useMemo(() => {
+    const mapa = new Map<
+      string,
+      { material: Material | undefined; cantidad: number }
+    >()
+    for (const consumo of consumos ?? []) {
+      const actual = mapa.get(consumo.material_id)
+      mapa.set(consumo.material_id, {
+        material: (materiales ?? []).find(
+          (item) => item.id === consumo.material_id,
+        ),
+        cantidad: (actual?.cantidad ?? 0) + consumo.cantidad,
+      })
+    }
+    return [...mapa.entries()]
+      .map(([materialId, item]) => ({ materialId, ...item }))
+      .sort((a, b) =>
+        (a.material?.nombre ?? '').localeCompare(
+          b.material?.nombre ?? '',
+          'es',
+        ),
+      )
+  }, [consumos, materiales])
 
   function abrirAvance(etapaId: string | null) {
     setEtapaInicial(etapaId)
@@ -261,7 +301,109 @@ function ObraPage() {
         )}
       </Card>
 
-      <div className="grid gap-3 sm:grid-cols-3">
+      <Card>
+        <div className="flex items-center justify-between gap-2">
+          <CardTitle className="flex items-center gap-2">
+            <Package className="size-5 text-navy" aria-hidden="true" />
+            Materiales usados
+          </CardTitle>
+          {materiales && materiales.length > 0 ? (
+            <Button
+              className="h-10 px-3 text-xs"
+              onClick={() => setConsumoAbierto(true)}
+            >
+              <Plus className="size-4" aria-hidden="true" />
+              Usé material
+            </Button>
+          ) : null}
+        </div>
+        <CardDescription className="mb-3">
+          Consumos descontados del inventario de esta obra.
+        </CardDescription>
+
+        {consumos === undefined || materiales === undefined ? (
+          <div className="h-16 animate-pulse rounded-sm bg-gray-100" />
+        ) : materiales.length === 0 ? (
+          <div className="grid gap-3 rounded-sm border border-dashed border-gray-300 bg-gray-50 px-4 py-6 text-center">
+            <p className="text-sm text-gray-500">
+              Primero crea tu catálogo de materiales.
+            </p>
+            <Button variant="outline" asChild>
+              <Link to="/materiales">
+                <Package className="size-4" aria-hidden="true" />
+                Ir a materiales
+              </Link>
+            </Button>
+          </div>
+        ) : inventario.length === 0 ? (
+          <div className="grid gap-3 rounded-sm border border-dashed border-gray-300 bg-gray-50 px-4 py-6 text-center">
+            <p className="text-sm text-gray-500">
+              Aún no has usado materiales en esta obra.
+            </p>
+            <Button onClick={() => setConsumoAbierto(true)}>
+              <Plus className="size-4" aria-hidden="true" />
+              Registrar primer consumo
+            </Button>
+          </div>
+        ) : (
+          <div className="grid gap-3">
+            <ul className="grid gap-2">
+              {inventario.map((item) => (
+                <li
+                  key={item.materialId}
+                  className="flex items-center justify-between gap-3 rounded-sm border border-gray-100 p-3"
+                >
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-bold text-navy">
+                      {item.material?.nombre ?? 'Material eliminado'}
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      {item.material?.categoria || 'Sin categoría'}
+                      {item.material && item.material.stock_minimo > 0
+                        ? ` · Mín. ${item.material.stock_minimo} ${item.material.unidad}`
+                        : ''}
+                    </p>
+                  </div>
+                  <Badge variant="blue">
+                    {Math.round(item.cantidad * 1000) / 1000}{' '}
+                    {item.material?.unidad ?? ''}
+                  </Badge>
+                </li>
+              ))}
+            </ul>
+
+            <div className="grid gap-1.5">
+              <p className="text-xs font-bold text-gray-700">
+                Últimos consumos
+              </p>
+              <ol className="grid gap-1.5">
+                {consumos.slice(0, 5).map((consumo) => (
+                  <li
+                    key={consumo.id}
+                    className="flex items-start justify-between gap-2 text-xs text-gray-700"
+                  >
+                    <span className="min-w-0">
+                      {formatearFecha(consumo.created_at)} ·{' '}
+                      {nombresEtapas.get(consumo.etapa_id ?? '') ??
+                        'Sin etapa'}
+                      {consumo.nota ? ` · ${consumo.nota}` : ''}
+                    </span>
+                    <span className="shrink-0 font-bold text-navy">
+                      {consumo.cantidad}
+                    </span>
+                  </li>
+                ))}
+              </ol>
+            </div>
+
+            <Button variant="ghost" asChild>
+              <Link to="/materiales">Administrar catálogo</Link>
+            </Button>
+          </div>
+        )}
+      </Card>
+
+      <div className="grid gap-3 sm:grid-cols-2">
         <EmptyState
           icon={<Camera className="size-6" aria-hidden="true" />}
           title="Fotos"
@@ -272,11 +414,6 @@ function ObraPage() {
           title="Compras"
           description="Registra compras y recibos."
         />
-        <EmptyState
-          icon={<Package className="size-6" aria-hidden="true" />}
-          title="Inventario"
-          description="Saldos de materiales de la obra."
-        />
       </div>
 
       <RegistrarAvanceDialog
@@ -284,6 +421,14 @@ function ObraPage() {
         onClose={() => setAvanceAbierto(false)}
         obraId={obra.id}
         etapaInicialId={etapaInicial}
+        etapas={etapas ?? []}
+      />
+
+      <RegistrarConsumoDialog
+        open={consumoAbierto}
+        onClose={() => setConsumoAbierto(false)}
+        obraId={obra.id}
+        materiales={materiales ?? []}
         etapas={etapas ?? []}
       />
     </div>

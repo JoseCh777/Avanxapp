@@ -37,7 +37,7 @@ export function Dialog({
 
     const focusTimer = window.setTimeout(() => {
       const target = panelRef.current?.querySelector<HTMLElement>(
-        'input, select, textarea, button',
+        'input, select, textarea',
       )
       target?.focus()
     }, 50)
