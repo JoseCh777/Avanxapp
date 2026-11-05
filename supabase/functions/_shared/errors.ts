@@ -32,7 +32,10 @@ export class ApiError extends Error {
   readonly details?: Record<string, unknown>
   readonly headers?: Record<string, string>
 
-  constructor(code: ErrorCode, opts: { message?: string; details?: Record<string, unknown>; headers?: Record<string, string> } = {}) {
+  constructor(
+    code: ErrorCode,
+    opts: { message?: string; details?: Record<string, unknown>; headers?: Record<string, string> } = {},
+  ) {
     super(opts.message ?? ERRORS[code].message)
     this.code = code
     this.status = ERRORS[code].status

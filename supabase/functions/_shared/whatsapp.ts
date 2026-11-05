@@ -35,7 +35,9 @@ function list(items: string[], max: number): string {
 export function buildWhatsAppText(input: WhatsAppMessageInput): string {
   const name = input.clientName?.trim()
   const lines = [
-    `Hola${name ? ` ${name}` : ''}, te comparto el avance de ${input.obraName.trim()}: ${clampProgress(input.progress)}%.`,
+    `Hola${name ? ` ${name}` : ''}, te comparto el avance de ${input.obraName.trim()}: ${
+      clampProgress(input.progress)
+    }%.`,
   ]
 
   const purchases = (input.recentPurchases ?? []).map(

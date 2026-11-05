@@ -1,20 +1,34 @@
-import { assertEquals } from 'jsr:@std/assert@1'
+import { assertEquals } from '@std/assert'
 import { authEmailToPhone, formatPhone, maskPhone, normalizePhone, phoneToAuthEmail } from './phone.ts'
 
 Deno.test('normalizePhone acepta formatos colombianos', () => {
-  for (const [input, expected] of [
-    ['3001234567', '+573001234567'],
-    ['300 123 4567', '+573001234567'],
-    ['+57 300-123-4567', '+573001234567'],
-    ['573001234567', '+573001234567'],
-    ['(601) 555 1234', '+576015551234'],
-  ]) {
+  for (
+    const [input, expected] of [
+      ['3001234567', '+573001234567'],
+      ['300 123 4567', '+573001234567'],
+      ['+57 300-123-4567', '+573001234567'],
+      ['573001234567', '+573001234567'],
+      ['(601) 555 1234', '+576015551234'],
+    ]
+  ) {
     assertEquals(normalizePhone(input), expected, input)
   }
 })
 
 Deno.test('normalizePhone rechaza inválidos', () => {
-  for (const input of ['', null, undefined, '300123456', '30012345678', '1234567890', '5001234567', '+1 300 123 4567', 'abc']) {
+  for (
+    const input of [
+      '',
+      null,
+      undefined,
+      '300123456',
+      '30012345678',
+      '1234567890',
+      '5001234567',
+      '+1 300 123 4567',
+      'abc',
+    ]
+  ) {
     assertEquals(normalizePhone(input), null, String(input))
   }
 })

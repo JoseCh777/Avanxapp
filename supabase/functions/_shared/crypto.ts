@@ -18,7 +18,9 @@ export const OWNER_TOKEN_RE = /^[A-Za-z0-9_-]{43}$/
 /** HMAC-SHA256(token, pepper) en hex. Es lo único que se guarda en `obras.token_hash`. */
 export async function hashOwnerToken(token: string, pepper: string): Promise<string> {
   if (!pepper || pepper.length < 32) throw new Error('OWNER_TOKEN_PEPPER ausente o muy corto')
-  const key = await crypto.subtle.importKey('raw', enc.encode(pepper), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign'])
+  const key = await crypto.subtle.importKey('raw', enc.encode(pepper), { name: 'HMAC', hash: 'SHA-256' }, false, [
+    'sign',
+  ])
   const sig = new Uint8Array(await crypto.subtle.sign('HMAC', key, enc.encode(token)))
   return Array.from(sig, (b) => b.toString(16).padStart(2, '0')).join('')
 }

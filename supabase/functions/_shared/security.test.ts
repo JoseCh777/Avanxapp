@@ -1,4 +1,4 @@
-import { assert, assertEquals, assertMatch, assertNotEquals, assertRejects, assertThrows } from 'jsr:@std/assert@1'
+import { assert, assertEquals, assertMatch, assertNotEquals, assertRejects, assertThrows } from '@std/assert'
 import { generateOwnerToken, generateTempPassword, hashOwnerToken, OWNER_TOKEN_RE, timingSafeEqual } from './crypto.ts'
 import { assertAdmin, parseAdminIds } from './admin.ts'
 import { ApiError } from './errors.ts'
@@ -100,8 +100,8 @@ Deno.test('error inesperado → internal sin filtrar el mensaje', async () => {
 })
 
 Deno.test('handler: preflight, cabeceras y errores', async () => {
-  const h = handler('test', { allowedOrigins: ['https://app.test'] }, async (req) => {
-    if (req.method === 'GET') return json({ ok: true })
+  const h = handler('test', { allowedOrigins: ['https://app.test'] }, (req) => {
+    if (req.method === 'GET') return Promise.resolve(json({ ok: true }))
     throw new ApiError('rate_limited', { headers: { 'Retry-After': '30' } })
   })
   const pre = await h(new Request('https://f/x', { method: 'OPTIONS', headers: { origin: 'https://app.test' } }))
