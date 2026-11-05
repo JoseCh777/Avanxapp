@@ -1,12 +1,23 @@
 import Dexie, { type EntityTable } from 'dexie'
 
-export type OutboxOperation = 'create' | 'update' | 'delete'
+export type SyncTable =
+  | 'obras'
+  | 'etapas'
+  | 'materiales'
+  | 'proveedores'
+  | 'etapa_avances'
+  | 'compras'
+  | 'consumos'
+  | 'fotos'
+  | 'avisos'
+
+export type OutboxOperation = 'insert' | 'upsert'
 
 export interface OutboxItem {
   id?: number
-  entity: string
-  operation: OutboxOperation
-  payload: unknown
+  table: SyncTable
+  op: OutboxOperation
+  row: Record<string, unknown>
   attempts: number
   lastError: string | null
   createdAt: string
@@ -22,18 +33,52 @@ export interface MediaQueueItem {
   createdAt: string
 }
 
+export interface Obra {
+  id: string
+  nombre: string
+  cliente_nombre: string
+  cliente_telefono: string | null
+  direccion: string
+  notas: string
+  estado: 'activa' | 'archivada'
+  deleted_at: string | null
+  client_updated_at: string
+  created_at: string
+}
+
+export interface Etapa {
+  id: string
+  obra_id: string
+  nombre: string
+  orden: number
+  peso: number
+  porcentaje: number
+  deleted_at: string | null
+  client_updated_at: string
+}
+
 /**
  * Base local (IndexedDB) — fuente de verdad offline.
- * Las tablas espejo del servidor se agregan en F5 según el contrato B1.
+ * Las filas usan el mismo nombre de campo que la API (snake_case).
  */
 class AvanxDatabase extends Dexie {
+  obras!: EntityTable<Obra, 'id'>
+  etapas!: EntityTable<Etapa, 'id'>
   outbox!: EntityTable<OutboxItem, 'id'>
   mediaQueue!: EntityTable<MediaQueueItem, 'id'>
 
   constructor() {
     super('avanxapp')
+
     this.version(1).stores({
       outbox: '++id, entity, createdAt',
+      mediaQueue: '++id, entity, entityId, status, createdAt',
+    })
+
+    this.version(2).stores({
+      obras: 'id, estado, client_updated_at',
+      etapas: 'id, obra_id, orden',
+      outbox: '++id, table, createdAt',
       mediaQueue: '++id, entity, entityId, status, createdAt',
     })
   }

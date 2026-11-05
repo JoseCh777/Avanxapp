@@ -19,6 +19,7 @@ PWA offline-first para maestros de obra en Colombia: avance, compras e inventari
 | `npm run build` | Tipos + build de producción |
 | `npm run typecheck` | Verificación de tipos |
 | `npm run lint` | ESLint |
+| `npm test` | Pruebas unitarias (Vitest) |
 | `npm run preview` | Sirve el build |
 | `npm run icons` | Regenera los íconos PWA desde `resource/Isotio.png` |
 
@@ -38,6 +39,14 @@ Guía de marca en `resource/avanxapp_sistema_de_diseno.html`. Tokens en
 - Azul `#0B2D5B`, hover `#123D78`, naranja `#FF6600`
 - Inter, escala H1 40 / H2 28 / H3 20 / Body 16 / Small 13
 - Radios 8 / 14 / 22 px, toque mínimo 48 px
+
+## Crear obra
+
+`/` lista las obras guardadas en IndexedDB. El botón **Crear obra** abre un
+formulario en dos pasos (datos y etapas con pesos). Al guardar se escribe la
+obra, sus 8 etapas de plantilla y las operaciones `upsert` en `outbox` dentro
+de una sola transacción, por lo que funciona sin conexión. El detalle está en
+`/obras/:id`.
 
 ## Pendientes por integrar
 
