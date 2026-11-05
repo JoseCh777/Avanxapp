@@ -4,6 +4,7 @@ import {
   calcularAvance,
   normalizarTelefono,
   validarNuevaObra,
+  validarPorcentaje,
   type NuevaObraInput,
 } from '@/lib/obras'
 import type { Etapa } from '@/lib/db'
@@ -65,8 +66,21 @@ describe('validarNuevaObra', () => {
   })
 })
 
-describe('calcularAvance', () => {
-  const etapa = (peso: number, porcentaje: number): Etapa => ({
+describe('validarPorcentaje', () => {
+  it('acepta el rango 0–100', () => {
+    expect(validarPorcentaje(0)).toBeNull()
+    expect(validarPorcentaje(47.5)).toBeNull()
+    expect(validarPorcentaje(100)).toBeNull()
+  })
+
+  it('rechaza valores fuera del rango o no numéricos', () => {
+    expect(validarPorcentaje(-1)).not.toBeNull()
+    expect(validarPorcentaje(101)).not.toBeNull()
+    expect(validarPorcentaje(Number.NaN)).not.toBeNull()
+  })
+})
+
+describe('calcularAvance', () => {  const etapa = (peso: number, porcentaje: number): Etapa => ({
     id: crypto.randomUUID(),
     obra_id: 'obra',
     nombre: `Etapa ${peso}`,

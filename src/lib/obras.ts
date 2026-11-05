@@ -1,4 +1,4 @@
-import { db, type Etapa, type Obra } from '@/lib/db'
+import { db, type Etapa, type EtapaAvance, type Obra } from '@/lib/db'
 
 export interface EtapaPlantilla {
   nombre: string
@@ -156,6 +156,106 @@ export function calcularAvance(etapas: Etapa[]): number {
     0,
   )
   return redondear(avance / pesoTotal * 100)
+}
+
+export function validarPorcentaje(porcentaje: number): string | null {
+  if (!Number.isFinite(porcentaje)) {
+    return 'Escribe un porcentaje válido.'
+  }
+  if (porcentaje < 0 || porcentaje > 100) {
+    return 'El porcentaje debe estar entre 0 y 100.'
+  }
+  return null
+}
+
+const DEVICE_KEY = 'avanx-device-id'
+
+export function obtenerDeviceId(): string {
+  const existente = window.localStorage.getItem(DEVICE_KEY)
+  if (existente) return existente
+  const id = crypto.randomUUID()
+  window.localStorage.setItem(DEVICE_KEY, id)
+  return id
+}
+
+export interface NuevoAvanceInput {
+  obraId: string
+  etapaId: string
+  porcentaje: number
+  nota: string
+}
+
+/**
+ * Registra un avance append-only: guarda el histórico y actualiza el
+ * porcentaje vigente de la etapa. Ambas operaciones van al outbox.
+ */
+export async function registrarAvance(
+  input: NuevoAvanceInput,
+): Promise<EtapaAvance> {
+  const ahora = new Date().toISOString()
+  const porcentaje = redondear(input.porcentaje)
+
+  const avance: EtapaAvance = {
+    id: crypto.randomUUID(),
+    obra_id: input.obraId,
+    etapa_id: input.etapaId,
+    porcentaje,
+    nota: input.nota.trim(),
+    captured_at: ahora,
+    device_id: obtenerDeviceId(),
+    idempotency_key: crypto.randomUUID(),
+  }
+
+  await db.transaction(
+    'rw',
+    db.etapaAvances,
+    db.etapas,
+    db.outbox,
+    async () => {
+      const etapa = await db.etapas.get(input.etapaId)
+      if (!etapa) {
+        throw new Error('La etapa no existe en este dispositivo.')
+      }
+
+      await db.etapaAvances.add(avance)
+
+      const actualizada: Etapa = {
+        ...etapa,
+        porcentaje,
+        client_updated_at: ahora,
+      }
+      await db.etapas.put(actualizada)
+
+      await db.outbox.bulkAdd([
+        {
+          table: 'etapa_avances',
+          op: 'insert',
+          row: { ...avance },
+          attempts: 0,
+          lastError: null,
+          createdAt: ahora,
+        },
+        {
+          table: 'etapas',
+          op: 'upsert',
+          row: { ...actualizada },
+          attempts: 0,
+          lastError: null,
+          createdAt: ahora,
+        },
+      ])
+    },
+  )
+
+  return avance
+}
+
+export function formatearFecha(iso: string): string {
+  return new Intl.DateTimeFormat('es-CO', {
+    dateStyle: 'medium',
+    timeStyle: 'short',
+    timeZone: 'America/Bogota',
+  }).format(new Date(iso))
 }
 
 export function redondear(valor: number): number {

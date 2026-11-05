@@ -1,21 +1,25 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useLiveQuery } from 'dexie-react-hooks'
 import {
   ArrowLeft,
   Camera,
+  History,
   MapPin,
   Package,
   Phone,
+  Plus,
   ReceiptText,
   StickyNote,
 } from 'lucide-react'
+import { RegistrarAvanceDialog } from '@/components/obras/registrar-avance-dialog'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import { Card, CardDescription, CardTitle } from '@/components/ui/card'
 import { EmptyState } from '@/components/ui/empty-state'
 import { Progress } from '@/components/ui/progress'
 import { db } from '@/lib/db'
-import { calcularAvance } from '@/lib/obras'
+import { calcularAvance, formatearFecha } from '@/lib/obras'
 
 export const Route = createFileRoute('/obras/$id')({
   component: ObraPage,
@@ -23,6 +27,9 @@ export const Route = createFileRoute('/obras/$id')({
 
 function ObraPage() {
   const { id } = Route.useParams()
+  const [avanceAbierto, setAvanceAbierto] = useState(false)
+  const [etapaInicial, setEtapaInicial] = useState<string | null>(null)
+
   const obra = useLiveQuery(() => db.obras.get(id), [id])
   const etapas = useLiveQuery(
     async () =>
@@ -31,22 +38,37 @@ function ObraPage() {
         .sort((a, b) => a.orden - b.orden),
     [id],
   )
+  const avances = useLiveQuery(
+    async () =>
+      (await db.etapaAvances.where('obra_id').equals(id).toArray()).sort(
+        (a, b) => b.captured_at.localeCompare(a.captured_at),
+      ),
+    [id],
+  )
   const pendientes = useLiveQuery(
     () =>
-      db.outbox
-        .toArray()
-        .then(
-          (items) =>
-            items.filter(
-              (item) =>
-                (item.table === 'obras' && item.row.id === id) ||
-                item.row.obra_id === id,
-            ).length,
-        ),
+      db.outbox.toArray().then(
+        (items) =>
+          items.filter(
+            (item) =>
+              (item.table === 'obras' && item.row.id === id) ||
+              item.row.obra_id === id,
+          ).length,
+      ),
     [id],
   )
 
   const avance = useMemo(() => calcularAvance(etapas ?? []), [etapas])
+  const nombresEtapas = useMemo(() => {
+    const mapa = new Map<string, string>()
+    for (const etapa of etapas ?? []) mapa.set(etapa.id, etapa.nombre)
+    return mapa
+  }, [etapas])
+
+  function abrirAvance(etapaId: string | null) {
+    setEtapaInicial(etapaId)
+    setAvanceAbierto(true)
+  }
 
   if (obra === undefined) {
     return (
@@ -111,10 +133,22 @@ function ObraPage() {
             <Badge variant="green">Sincronizada</Badge>
           )}
         </div>
-        <Progress value={avance} className="mt-3" />
+        <p className="mt-2 text-4xl font-extrabold tracking-tight text-navy">
+          {avance}%
+        </p>
+        <Progress value={avance} className="mt-1" />
         <CardDescription className="mt-2">
           Promedio ponderado de {etapas?.length ?? 0} etapas.
         </CardDescription>
+        <Button
+          size="lg"
+          className="mt-4 w-full"
+          onClick={() => abrirAvance(null)}
+          disabled={!etapas?.length}
+        >
+          <Plus className="size-5" aria-hidden="true" />
+          Registrar avance
+        </Button>
       </Card>
 
       {obra.cliente_telefono || obra.direccion || obra.notas ? (
@@ -152,7 +186,7 @@ function ObraPage() {
       <Card>
         <CardTitle>Etapas</CardTitle>
         <CardDescription className="mb-3">
-          Peso de cada etapa dentro del avance total.
+          Toca una etapa para registrar su avance.
         </CardDescription>
         <ul className="grid gap-2">
           {(etapas ?? []).map((etapa) => (
@@ -161,14 +195,70 @@ function ObraPage() {
               className="rounded-sm border border-gray-100 bg-gray-50 p-3"
             >
               <div className="flex items-center justify-between gap-2">
-                <p className="text-sm font-bold text-navy">{etapa.nombre}</p>
-                <span className="text-xs font-bold text-gray-500">
-                  {etapa.porcentaje}% · peso {etapa.peso}%
-                </span>
+                <p className="min-w-0 truncate text-sm font-bold text-navy">
+                  {etapa.nombre}
+                </p>
+                <button
+                  type="button"
+                  onClick={() => abrirAvance(etapa.id)}
+                  className="inline-flex min-h-9 shrink-0 items-center gap-1 rounded-full border border-navy/20 bg-white px-3 text-xs font-bold text-navy hover:bg-gray-100"
+                >
+                  <Plus className="size-3.5" aria-hidden="true" />
+                  Avance
+                </button>
               </div>
-              <Progress value={etapa.porcentaje} className="mt-2" />            </li>
+              <Progress value={etapa.porcentaje} className="mt-2" />
+              <div className="mt-1.5 flex items-center justify-between text-xs font-semibold text-gray-500">
+                <span>{etapa.porcentaje}% completado</span>
+                <span>Peso {etapa.peso}%</span>
+              </div>
+            </li>
           ))}
         </ul>
+      </Card>
+
+      <Card>
+        <CardTitle className="flex items-center gap-2">
+          <History className="size-5 text-navy" aria-hidden="true" />
+          Historial de avance
+        </CardTitle>
+        <CardDescription className="mb-3">
+          Registros guardados, el más reciente primero.
+        </CardDescription>
+
+        {avances === undefined ? (
+          <div className="h-16 animate-pulse rounded-sm bg-gray-100" />
+        ) : avances.length === 0 ? (
+          <div className="rounded-sm border border-dashed border-gray-300 bg-gray-50 px-4 py-6 text-center text-sm text-gray-500">
+            Todavía no hay avances registrados.
+          </div>
+        ) : (
+          <ol className="grid gap-2">
+            {avances.map((registro) => (
+              <li
+                key={registro.id}
+                className="rounded-sm border border-gray-100 p-3"
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-bold text-navy">
+                      {nombresEtapas.get(registro.etapa_id) ?? 'Etapa'}
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      {formatearFecha(registro.captured_at)}
+                    </p>
+                  </div>
+                  <span className="shrink-0 rounded-full bg-success-soft px-2.5 py-1 text-xs font-extrabold text-success">
+                    {registro.porcentaje}%
+                  </span>
+                </div>
+                {registro.nota ? (
+                  <p className="mt-2 text-sm text-gray-700">{registro.nota}</p>
+                ) : null}
+              </li>
+            ))}
+          </ol>
+        )}
       </Card>
 
       <div className="grid gap-3 sm:grid-cols-3">
@@ -188,6 +278,14 @@ function ObraPage() {
           description="Saldos de materiales de la obra."
         />
       </div>
+
+      <RegistrarAvanceDialog
+        open={avanceAbierto}
+        onClose={() => setAvanceAbierto(false)}
+        obraId={obra.id}
+        etapaInicialId={etapaInicial}
+        etapas={etapas ?? []}
+      />
     </div>
   )
 }

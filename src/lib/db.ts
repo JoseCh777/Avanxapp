@@ -57,6 +57,17 @@ export interface Etapa {
   client_updated_at: string
 }
 
+export interface EtapaAvance {
+  id: string
+  obra_id: string
+  etapa_id: string
+  porcentaje: number
+  nota: string
+  captured_at: string
+  device_id: string
+  idempotency_key: string
+}
+
 /**
  * Base local (IndexedDB) — fuente de verdad offline.
  * Las filas usan el mismo nombre de campo que la API (snake_case).
@@ -64,6 +75,7 @@ export interface Etapa {
 class AvanxDatabase extends Dexie {
   obras!: EntityTable<Obra, 'id'>
   etapas!: EntityTable<Etapa, 'id'>
+  etapaAvances!: EntityTable<EtapaAvance, 'id'>
   outbox!: EntityTable<OutboxItem, 'id'>
   mediaQueue!: EntityTable<MediaQueueItem, 'id'>
 
@@ -78,6 +90,14 @@ class AvanxDatabase extends Dexie {
     this.version(2).stores({
       obras: 'id, estado, client_updated_at',
       etapas: 'id, obra_id, orden',
+      outbox: '++id, table, createdAt',
+      mediaQueue: '++id, entity, entityId, status, createdAt',
+    })
+
+    this.version(3).stores({
+      obras: 'id, estado, client_updated_at',
+      etapas: 'id, obra_id, orden',
+      etapa_avances: 'id, obra_id, etapa_id, captured_at',
       outbox: '++id, table, createdAt',
       mediaQueue: '++id, entity, entityId, status, createdAt',
     })
